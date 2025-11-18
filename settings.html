@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הגדרות - לוח בקרה</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&family=Heebo:wght@300;400;600;700&family=Rubik:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/settings.css">
+</head>
+<body>
+    <div class="settings-page">
+        <header class="settings-header">
+            <button class="back-btn" id="backBtn">← חזרה ללוח הבקרה</button>
+            <h1>⚙️ הגדרות מתקדמות</h1>
+        </header>
+
+        <div class="settings-container">
+            <!-- Themes Section -->
+            <section class="settings-section">
+                <h2>🎨 ערכות נושא</h2>
+                <div class="theme-selector">
+                    <button class="theme-card" data-theme="default">
+                        <div class="theme-preview default-preview"></div>
+                        <span>ברירת מחדל</span>
+                    </button>
+                    <button class="theme-card" data-theme="dark">
+                        <div class="theme-preview dark-preview"></div>
+                        <span>כהה</span>
+                    </button>
+                    <button class="theme-card" data-theme="blue">
+                        <div class="theme-preview blue-preview"></div>
+                        <span>כחול</span>
+                    </button>
+                    <button class="theme-card" data-theme="green">
+                        <div class="theme-preview green-preview"></div>
+                        <span>ירוק</span>
+                    </button>
+                    <button class="theme-card" data-theme="custom">
+                        <div class="theme-preview custom-preview">+</div>
+                        <span>מותאם אישית</span>
+                    </button>
+                </div>
+                <div class="current-theme">
+                    <strong>נושא נוכחי:</strong> <span id="currentThemeName">ברירת מחדל</span>
+                </div>
+            </section>
+
+            <!-- Colors Section -->
+            <section class="settings-section" id="colorsSection">
+                <h2>🎨 עריכת צבעים</h2>
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <label for="primaryColor">צבע ראשי</label>
+                        <div class="color-input-group">
+                            <input type="color" id="primaryColor" value="#4f46e5">
+                            <input type="text" class="color-text" id="primaryColorText" value="#4f46e5">
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label for="secondaryColor">צבע משני</label>
+                        <div class="color-input-group">
+                            <input type="color" id="secondaryColor" value="#7c3aed">
+                            <input type="text" class="color-text" id="secondaryColorText" value="#7c3aed">
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label for="backgroundColor">רקע עיקרי</label>
+                        <div class="color-input-group">
+                            <input type="color" id="backgroundColor" value="#0f172a">
+                            <input type="text" class="color-text" id="backgroundColorText" value="#0f172a">
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label for="surfaceColor">רקע כרטיסים</label>
+                        <div class="color-input-group">
+                            <input type="color" id="surfaceColor" value="#ffffff">
+                            <input type="text" class="color-text" id="surfaceColorText" value="#ffffff">
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label for="textColor">צבע טקסט</label>
+                        <div class="color-input-group">
+                            <input type="color" id="textColor" value="#0f172a">
+                            <input type="text" class="color-text" id="textColorText" value="#0f172a">
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label for="mutedColor">טקסט משני</label>
+                        <div class="color-input-group">
+                            <input type="color" id="mutedColor" value="#64748b">
+                            <input type="text" class="color-text" id="mutedColorText" value="#64748b">
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label for="borderColor">גבולות</label>
+                        <div class="color-input-group">
+                            <input type="color" id="borderColor" value="#e2e8f0">
+                            <input type="text" class="color-text" id="borderColorText" value="#e2e8f0">
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label for="successColor">הצלחה</label>
+                        <div class="color-input-group">
+                            <input type="color" id="successColor" value="#22c55e">
+                            <input type="text" class="color-text" id="successColorText" value="#22c55e">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Typography Section -->
+            <section class="settings-section">
+                <h2>✍️ טיפוגרפיה</h2>
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <label for="fontFamily">גופן עיקרי</label>
+                        <select id="fontFamily">
+                            <option value="Assistant">Assistant</option>
+                            <option value="Heebo">Heebo</option>
+                            <option value="Rubik">Rubik</option>
+                            <option value="system-ui">מערכת</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <label for="baseFontSize">גודל בסיס (px)</label>
+                        <input type="number" id="baseFontSize" value="16" min="12" max="24">
+                    </div>
+                    <div class="setting-item">
+                        <label for="h1Size">כותרת ראשית (rem)</label>
+                        <input type="number" id="h1Size" value="2.4" min="1.5" max="4" step="0.1">
+                    </div>
+                    <div class="setting-item">
+                        <label for="h2Size">כותרת משנית (rem)</label>
+                        <input type="number" id="h2Size" value="1.8" min="1.2" max="3" step="0.1">
+                    </div>
+                    <div class="setting-item">
+                        <label for="bodySize">טקסט רגיל (rem)</label>
+                        <input type="number" id="bodySize" value="1" min="0.8" max="1.5" step="0.05">
+                    </div>
+                    <div class="setting-item">
+                        <label for="smallSize">טקסט קטן (rem)</label>
+                        <input type="number" id="smallSize" value="0.875" min="0.7" max="1.2" step="0.05">
+                    </div>
+                    <div class="setting-item">
+                        <label for="lineHeight">גובה שורה</label>
+                        <input type="number" id="lineHeight" value="1.5" min="1" max="2.5" step="0.1">
+                    </div>
+                    <div class="setting-item">
+                        <label for="fontWeight">משקל גופן</label>
+                        <select id="fontWeight">
+                            <option value="300">דק (300)</option>
+                            <option value="400" selected>רגיל (400)</option>
+                            <option value="500">בינוני (500)</option>
+                            <option value="600">מודגש (600)</option>
+                            <option value="700">עבה (700)</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Spacing Section -->
+            <section class="settings-section">
+                <h2>📏 מרווחים ועיגולים</h2>
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <label for="borderRadius">עיגול פינות (px)</label>
+                        <input type="number" id="borderRadius" value="12" min="0" max="50">
+                    </div>
+                    <div class="setting-item">
+                        <label for="cardRadius">עיגול כרטיסים (px)</label>
+                        <input type="number" id="cardRadius" value="18" min="0" max="50">
+                    </div>
+                    <div class="setting-item">
+                        <label for="padding">ריפוד בסיס (rem)</label>
+                        <input type="number" id="padding" value="1" min="0.5" max="3" step="0.25">
+                    </div>
+                    <div class="setting-item">
+                        <label for="gap">מרווח בין אלמנטים (rem)</label>
+                        <input type="number" id="gap" value="1" min="0.5" max="3" step="0.25">
+                    </div>
+                    <div class="setting-item">
+                        <label for="cardPadding">ריפוד כרטיסים (rem)</label>
+                        <input type="number" id="cardPadding" value="1.5" min="0.5" max="3" step="0.25">
+                    </div>
+                    <div class="setting-item">
+                        <label for="shadowIntensity">עוצמת צל</label>
+                        <input type="range" id="shadowIntensity" value="0.15" min="0" max="0.5" step="0.05">
+                        <span class="range-value">0.15</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Text Content Section -->
+            <section class="settings-section">
+                <h2>📝 עריכת תוכן</h2>
+                <div class="settings-grid-full">
+                    <div class="setting-item">
+                        <label for="mainTitle">כותרת ראשית</label>
+                        <input type="text" id="mainTitle" value="לוח בקרה לאפליקציות שלי">
+                    </div>
+                    <div class="setting-item">
+                        <label for="mainSubtitle">תת כותרת</label>
+                        <input type="text" id="mainSubtitle" value="מקום אחד בו ניתן לראות, לארגן ולהגיע לכל המערכות האישיות שאתה בונה.">
+                    </div>
+                    <div class="setting-item">
+                        <label for="addButtonText">כפתור הוספה</label>
+                        <input type="text" id="addButtonText" value="+ הוספת אפליקציה">
+                    </div>
+                    <div class="setting-item">
+                        <label for="exportButtonText">כפתור ייצוא</label>
+                        <input type="text" id="exportButtonText" value="📥 ייצוא">
+                    </div>
+                    <div class="setting-item">
+                        <label for="importButtonText">כפתור ייבוא</label>
+                        <input type="text" id="importButtonText" value="📤 ייבוא">
+                    </div>
+                    <div class="setting-item">
+                        <label for="searchPlaceholder">placeholder חיפוש</label>
+                        <input type="text" id="searchPlaceholder" value="חיפוש לפי שם או תיאור...">
+                    </div>
+                    <div class="setting-item">
+                        <label for="emptyStateTitle">כותרת מצב ריק</label>
+                        <input type="text" id="emptyStateTitle" value="עוד אין אפליקציות בלוח">
+                    </div>
+                    <div class="setting-item">
+                        <label for="emptyStateText">טקסט מצב ריק</label>
+                        <input type="text" id="emptyStateText" value='לחץ על "הוספת אפליקציה" כדי להוסיף את הפרויקט הראשון שלך.'>
+                    </div>
+                    <div class="setting-item">
+                        <label for="modalAddTitle">כותרת חלון הוספה</label>
+                        <input type="text" id="modalAddTitle" value="הוספת אפליקציה">
+                    </div>
+                    <div class="setting-item">
+                        <label for="modalEditTitle">כותרת חלון עריכה</label>
+                        <input type="text" id="modalEditTitle" value="עריכת אפליקציה">
+                    </div>
+                    <div class="setting-item">
+                        <label for="stat1Label">תווית סטטיסטיקה 1</label>
+                        <input type="text" id="stat1Label" value='סה"כ אפליקציות'>
+                    </div>
+                    <div class="setting-item">
+                        <label for="stat2Label">תווית סטטיסטיקה 2</label>
+                        <input type="text" id="stat2Label" value="שפות פעילות">
+                    </div>
+                    <div class="setting-item">
+                        <label for="stat3Label">תווית סטטיסטיקה 3</label>
+                        <input type="text" id="stat3Label" value="קטגוריות פעילות">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Actions -->
+            <section class="settings-actions">
+                <button class="btn-preview" id="previewBtn">👁️ תצוגה מקדימה</button>
+                <button class="btn-save" id="saveBtn">💾 שמור הגדרות</button>
+                <button class="btn-reset" id="resetBtn">🔄 איפוס להגדרות ברירת מחדל</button>
+                <button class="btn-export-settings" id="exportSettingsBtn">📥 ייצוא הגדרות</button>
+                <button class="btn-import-settings" id="importSettingsBtn">📤 ייבוא הגדרות</button>
+                <input type="file" id="importSettingsFile" accept=".json" hidden>
+            </section>
+
+            <!-- Preview -->
+            <section class="preview-section" id="previewSection" hidden>
+                <h2>👁️ תצוגה מקדימה</h2>
+                <div class="preview-container">
+                    <div class="preview-card">
+                        <h3>דוגמה לכרטיס</h3>
+                        <p>זהו דוגמה לכרטיס עם הצבעים והגופנים שבחרת.</p>
+                        <button class="preview-button">כפתור דוגמה</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src="js/settings.js"></script>
+</body>
+</html>

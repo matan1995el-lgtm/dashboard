@@ -2,8 +2,77 @@
 
 const storageKey = 'myAppsDashboard';
 const backupReminderKey = 'lastBackupReminder';
-const BACKUP_REMINDER_DAYS = 7; // Remind every 7 days
+const SETTINGS_KEY = 'dashboardSettings';
+const BACKUP_REMINDER_HOURS = 12; // Remind every 12 hours (twice a day)
 const USE_CLOUD = true; // Set to false to use localStorage only
+
+// Load and apply settings
+function loadAndApplySettings() {
+    try {
+        const saved = localStorage.getItem(SETTINGS_KEY);
+        if (!saved) return;
+        
+        const settings = JSON.parse(saved);
+        
+        // Apply colors
+        if (settings.colors) {
+            document.documentElement.style.setProperty('--primary', settings.colors.primary);
+            document.documentElement.style.setProperty('--secondary', settings.colors.secondary);
+            document.documentElement.style.setProperty('--bg', settings.colors.background);
+            document.documentElement.style.setProperty('--surface-solid', settings.colors.surface);
+            document.documentElement.style.setProperty('--text', settings.colors.text);
+            document.documentElement.style.setProperty('--muted', settings.colors.muted);
+            document.documentElement.style.setProperty('--border', settings.colors.border);
+            document.documentElement.style.setProperty('--success', settings.colors.success);
+        }
+        
+        // Apply typography
+        if (settings.typography) {
+            document.documentElement.style.fontSize = settings.typography.baseFontSize + 'px';
+            document.body.style.fontFamily = settings.typography.fontFamily + ', system-ui, sans-serif';
+            document.body.style.lineHeight = settings.typography.lineHeight;
+            document.body.style.fontWeight = settings.typography.fontWeight;
+        }
+        
+        // Apply spacing
+        if (settings.spacing) {
+            document.documentElement.style.setProperty('--border-radius', settings.spacing.borderRadius + 'px');
+            document.documentElement.style.setProperty('--card-radius', settings.spacing.cardRadius + 'px');
+            document.documentElement.style.setProperty('--padding', settings.spacing.padding + 'rem');
+            document.documentElement.style.setProperty('--gap', settings.spacing.gap + 'rem');
+            document.documentElement.style.setProperty('--card-padding', settings.spacing.cardPadding + 'rem');
+        }
+        
+        // Apply content
+        if (settings.content) {
+            const mainTitle = document.getElementById('mainTitle');
+            const mainSubtitle = document.getElementById('mainSubtitle');
+            const addBtnText = document.getElementById('addBtnText');
+            const exportBtnText = document.getElementById('exportBtnText');
+            const importBtnText = document.getElementById('importBtnText');
+            const searchInput = document.getElementById('searchInput');
+            const emptyStateTitle = document.getElementById('emptyStateTitle');
+            const emptyStateText = document.getElementById('emptyStateText');
+            const stat1Label = document.getElementById('stat1Label');
+            const stat2Label = document.getElementById('stat2Label');
+            const stat3Label = document.getElementById('stat3Label');
+            
+            if (mainTitle) mainTitle.textContent = settings.content.mainTitle;
+            if (mainSubtitle) mainSubtitle.textContent = settings.content.mainSubtitle;
+            if (addBtnText) addBtnText.textContent = settings.content.addButtonText;
+            if (exportBtnText) exportBtnText.textContent = settings.content.exportButtonText;
+            if (importBtnText) importBtnText.textContent = settings.content.importButtonText;
+            if (searchInput) searchInput.placeholder = settings.content.searchPlaceholder;
+            if (emptyStateTitle) emptyStateTitle.textContent = settings.content.emptyStateTitle;
+            if (emptyStateText) emptyStateText.textContent = settings.content.emptyStateText;
+            if (stat1Label) stat1Label.textContent = settings.content.stat1Label;
+            if (stat2Label) stat2Label.textContent = settings.content.stat2Label;
+            if (stat3Label) stat3Label.textContent = settings.content.stat3Label;
+        }
+    } catch (error) {
+        console.error('Error loading settings:', error);
+    }
+}
 const createId = () => (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
     ? crypto.randomUUID()
     : `app-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`);
@@ -43,11 +112,13 @@ let isSyncing = false;
 // API Functions
 async function loadFromCloud() {
     try {
-        updateSyncStatus('מסנכרן...', 'syncing');
+        updateSyncStatus('טוען...', 'syncing');
         const response = await fetch('tables/apps?limit=1000');
         if (!response.ok) throw new Error('Network response was not ok');
         
         const result = await response.json();
+        console.log('Loaded from cloud:', result.data.length, 'apps');
+        
         apps = result.data.map(item => ({
             id: item.id,
             name: item.name || '',
@@ -61,13 +132,17 @@ async function loadFromCloud() {
             updatedAt: item.updatedAt || null
         }));
         
-        updateSyncStatus('מסונכרן ✓', 'success');
-        setTimeout(() => updateSyncStatus(''), 2000);
+        if (apps.length === 0) {
+            updateSyncStatus('מוכן לשימוש ✓', 'success');
+        } else {
+            updateSyncStatus(`מסונכרן (${apps.length}) ✓`, 'success');
+        }
+        // Don't clear the status
         return true;
     } catch (error) {
         console.error('שגיאה בטעינה מהענן:', error);
-        updateSyncStatus('שגיאה בסנכרון', 'error');
-        setTimeout(() => updateSyncStatus(''), 3000);
+        updateSyncStatus('לא מחובר לענן', 'error');
+        // Don't clear error status
         return false;
     }
 }
@@ -84,12 +159,12 @@ async function saveToCloud(appData) {
         if (!response.ok) throw new Error('Failed to save');
         const saved = await response.json();
         updateSyncStatus('נשמר ✓', 'success');
-        setTimeout(() => updateSyncStatus(''), 2000);
+        // Don't clear the status
         return saved;
     } catch (error) {
         console.error('שגיאה בשמירה לענן:', error);
         updateSyncStatus('שגיאה בשמירה', 'error');
-        setTimeout(() => updateSyncStatus(''), 3000);
+        // Don't clear error status
         throw error;
     }
 }
@@ -106,12 +181,12 @@ async function updateInCloud(recordId, appData) {
         if (!response.ok) throw new Error('Failed to update');
         const updated = await response.json();
         updateSyncStatus('עודכן ✓', 'success');
-        setTimeout(() => updateSyncStatus(''), 2000);
+        // Don't clear the status
         return updated;
     } catch (error) {
         console.error('שגיאה בעדכון בענן:', error);
         updateSyncStatus('שגיאה בעדכון', 'error');
-        setTimeout(() => updateSyncStatus(''), 3000);
+        // Don't clear error status
         throw error;
     }
 }
@@ -125,12 +200,12 @@ async function deleteFromCloud(recordId) {
         
         if (!response.ok) throw new Error('Failed to delete');
         updateSyncStatus('נמחק ✓', 'success');
-        setTimeout(() => updateSyncStatus(''), 2000);
+        // Don't clear the status
         return true;
     } catch (error) {
         console.error('שגיאה במחיקה מהענן:', error);
         updateSyncStatus('שגיאה במחיקה', 'error');
-        setTimeout(() => updateSyncStatus(''), 3000);
+        // Don't clear error status
         throw error;
     }
 }
@@ -470,7 +545,8 @@ async function deleteApp(id) {
 
 function openModal() {
     editingAppId = null;
-    dom.modalTitle.textContent = 'הוספת אפליקציה';
+    const settings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
+    dom.modalTitle.textContent = settings.content?.modalAddTitle || 'הוספת אפליקציה';
     dom.form.reset();
     if (!dom.modal.open) {
         dom.modal.showModal();
@@ -485,7 +561,8 @@ function openEditModal(appId) {
     if (!app) return;
 
     editingAppId = appId;
-    dom.modalTitle.textContent = 'עריכת אפליקציה';
+    const settings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
+    dom.modalTitle.textContent = settings.content?.modalEditTitle || 'עריכת אפליקציה';
     
     document.getElementById('appName').value = app.name || '';
     document.getElementById('appDescription').value = app.description || '';
@@ -591,6 +668,14 @@ function setupEventListeners() {
         closeModal();
     });
     
+    // Settings button
+    const settingsBtn = document.getElementById('settingsBtn');
+    if (settingsBtn) {
+        settingsBtn.addEventListener('click', () => {
+            window.location.href = 'settings.html';
+        });
+    }
+    
     // Backup reminder buttons
     const backupNowBtn = document.getElementById('backupNowBtn');
     const snoozeBackupBtn = document.getElementById('snoozeBackupBtn');
@@ -607,14 +692,14 @@ function checkBackupReminder() {
     const now = Date.now();
     
     if (!lastBackup) {
-        // First time - set initial timestamp
-        localStorage.setItem(backupReminderKey, now.toString());
+        // First time - show reminder immediately
+        showBackupReminder();
         return;
     }
     
-    const daysSinceBackup = (now - parseInt(lastBackup)) / (1000 * 60 * 60 * 24);
+    const hoursSinceBackup = (now - parseInt(lastBackup)) / (1000 * 60 * 60);
     
-    if (daysSinceBackup >= BACKUP_REMINDER_DAYS) {
+    if (hoursSinceBackup >= BACKUP_REMINDER_HOURS) {
         showBackupReminder();
     }
 }
@@ -634,13 +719,16 @@ function hideBackupReminder() {
 }
 
 function snoozeBackupReminder() {
-    // Snooze for 2 days
-    const snoozeTime = Date.now() - (5 * 24 * 60 * 60 * 1000); // Show again in 2 days
+    // Snooze for 6 hours
+    const snoozeTime = Date.now() - (6 * 60 * 60 * 1000); // Show again in 6 hours
     localStorage.setItem(backupReminderKey, snoozeTime.toString());
     hideBackupReminder();
 }
 
 async function init() {
+    // Load and apply settings first
+    loadAndApplySettings();
+    
     if (!('showModal' in HTMLDialogElement.prototype)) {
         console.warn('הדפדפן לא תומך ברכיב dialog באופן מלא.');
         dom.modal.classList.add('modal-fallback');
