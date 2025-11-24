@@ -7,6 +7,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
 :root {
     color-scheme: light dark;
@@ -128,6 +131,12 @@ body {
 .sync-status.sync-error {
     background: rgba(239, 68, 68, 0.1);
     color: #ef4444;
+}
+
+.sync-status.sync-offline {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
 .backup-reminder-compact {
@@ -479,6 +488,21 @@ body {
     border: 1px solid var(--border);
     box-shadow: 0 8px 16px rgba(15, 23, 42, 0.08);
     min-height: auto;
+    cursor: grab;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.app-card:active {
+    cursor: grabbing;
+}
+
+.app-card.dragging {
+    opacity: 0.5;
+    transform: rotate(5deg);
+}
+
+.app-card.drag-over {
+    border: 2px dashed #4f46e5;
 }
 
 @media (min-width: 768px) {
@@ -507,12 +531,16 @@ body {
     gap: 0.25rem;
 }
 
-.card-color {
+.card-icon {
     width: 42px;
     height: 42px;
     border-radius: 14px;
     border: 2px solid rgba(255, 255, 255, 0.65);
     box-shadow: inset 0 1px 4px rgba(15, 23, 42, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
 }
 
 .card-body {
@@ -548,6 +576,12 @@ body {
     background: rgba(148, 163, 184, 0.12);
     color: var(--muted);
     font-size: 0.85rem;
+}
+
+.favorite-badge {
+    background: rgba(255, 193, 7, 0.15) !important;
+    color: #ffc107 !important;
+    border: 1px solid rgba(255, 193, 7, 0.3);
 }
 
 .tags {
@@ -718,12 +752,95 @@ textarea {
     background: rgba(239, 68, 68, 0.12);
 }
 
+.favorite-btn {
+    color: #ffc107;
+    font-size: 1.2rem;
+}
+
+.favorite-btn:hover {
+    background: rgba(255, 193, 7, 0.12);
+}
+
+.icon-selector {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.icon-option {
+    background: rgba(148, 163, 184, 0.15);
+    border: 2px solid transparent;
+    border-radius: 8px;
+    padding: 0.5rem;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.icon-option:hover {
+    background: rgba(148, 163, 184, 0.25);
+    transform: scale(1.1);
+}
+
+.icon-option.selected {
+    border-color: #4f46e5;
+    background: rgba(79, 70, 229, 0.15);
+}
+
 .visually-hidden {
     position: absolute !important;
     height: 1px; width: 1px;
     overflow: hidden;
     clip: rect(1px, 1px, 1px, 1px);
     white-space: nowrap;
+}
+
+.update-notification {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: white;
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    transform: translateY(-100px);
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 10000;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.update-notification.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.notification-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    justify-content: space-between;
+}
+
+.notification-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0.2rem;
+}
+
+@media (max-width: 768px) {
+    .update-notification {
+        left: 10px;
+        right: 10px;
+        top: 10px;
+    }
 }
 
 @media (max-width: 767px) {
@@ -781,9 +898,10 @@ textarea {
         font-size: 2.5rem;
     }
 
-    .card-color {
+    .card-icon {
         width: 36px;
         height: 36px;
+        font-size: 1.2rem;
     }
 
     .app-name {
@@ -811,6 +929,10 @@ textarea {
     .modal-footer button {
         width: 100%;
     }
+
+    .icon-selector {
+        grid-template-columns: repeat(4, 1fr);
+    }
 }
     </style>
 </head>
@@ -831,7 +953,7 @@ textarea {
                 <p id="mainSubtitle">מקום אחד בו ניתן לראות, לארגן ולהגיע לכל המערכות האישיות שאתה בונה.</p>
             </div>
             <div class="header-actions">
-                <span id="syncStatus" class="sync-status"></span>
+                <span id="syncStatus" class="sync-status">טוען...</span>
                 <button class="icon-btn-settings" id="settingsBtn" type="button" title="הגדרות">⚙️</button>
                 <button class="secondary-btn" id="exportBtn" type="button" title="ייצוא נתונים">
                     <span id="exportBtnText">📥 ייצוא</span>
@@ -851,9 +973,14 @@ textarea {
                 <div class="search-wrapper">
                     <label for="searchInput" class="visually-hidden">חיפוש</label>
                     <span class="icon" aria-hidden="true">🔍</span>
-                    <input id="searchInput" type="search" autocomplete="off">
+                    <input id="searchInput" type="search" autocomplete="off" placeholder="חיפוש לפי שם או תיאור...">
                 </div>
                 <div class="filters">
+                    <label for="favoriteFilter">מועדפים</label>
+                    <select id="favoriteFilter">
+                        <option value="all">הכל</option>
+                        <option value="favorites">מועדפים בלבד</option>
+                    </select>
                     <label for="languageFilter">שפה</label>
                     <select id="languageFilter">
                         <option value="all">הכל</option>
@@ -861,6 +988,15 @@ textarea {
                     <label for="categoryFilter">קטגוריה</label>
                     <select id="categoryFilter">
                         <option value="all">הכל</option>
+                    </select>
+                    <label for="sortSelect">מיון</label>
+                    <select id="sortSelect">
+                        <option value="newest">חדש ביותר</option>
+                        <option value="oldest">ישן ביותר</option>
+                        <option value="name">שם (א-ב)</option>
+                        <option value="name-desc">שם (ת-א)</option>
+                        <option value="favorite">מועדפים ראשון</option>
+                        <option value="custom">סדר מותאם אישית</option>
                     </select>
                 </div>
             </section>
@@ -935,6 +1071,23 @@ textarea {
                     <label for="appColor">צבע כרטיס</label>
                     <input type="color" id="appColor" name="color" value="#4f46e5">
                 </div>
+
+                <div class="form-group">
+                    <label for="appIcon">אייקון</label>
+                    <div class="icon-selector">
+                        <button type="button" class="icon-option" data-icon="📱">📱</button>
+                        <button type="button" class="icon-option" data-icon="💻">💻</button>
+                        <button type="button" class="icon-option" data-icon="🌐">🌐</button>
+                        <button type="button" class="icon-option" data-icon="📊">📊</button>
+                        <button type="button" class="icon-option" data-icon="🎮">🎮</button>
+                        <button type="button" class="icon-option" data-icon="🛒">🛒</button>
+                        <button type="button" class="icon-option" data-icon="📧">📧</button>
+                        <button type="button" class="icon-option" data-icon="🎵">🎵</button>
+                        <button type="button" class="icon-option" data-icon="🎬">🎬</button>
+                        <button type="button" class="icon-option" data-icon="📚">📚</button>
+                    </div>
+                    <input type="hidden" id="appIcon" name="icon" value="📱">
+                </div>
             </div>
 
             <footer class="modal-footer">
@@ -947,8 +1100,9 @@ textarea {
     <template id="appCardTemplate">
         <article class="app-card">
             <div class="card-header">
-                <div class="card-color" aria-hidden="true"></div>
+                <div class="card-icon" aria-hidden="true"></div>
                 <div class="card-actions">
+                    <button class="icon-btn favorite-btn" type="button" aria-label="הוסף למועדפים">☆</button>
                     <button class="icon-btn edit-btn" type="button" aria-label="עריכת אפליקציה">✏️</button>
                     <button class="icon-btn delete-btn" type="button" aria-label="מחיקת אפליקציה">🗑️</button>
                 </div>
@@ -959,6 +1113,7 @@ textarea {
                 <div class="app-meta">
                     <span class="meta-item language"></span>
                     <span class="meta-item category"></span>
+                    <span class="meta-item favorite-badge" hidden>⭐ מועדף</span>
                 </div>
                 <div class="tags"></div>
             </div>
@@ -966,6 +1121,6 @@ textarea {
         </article>
     </template>
 
-    <script src="js/app-cloud.js" defer></script>
+    <script src="js/app-firebase.js"></script>
 </body>
 </html>

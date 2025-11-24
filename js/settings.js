@@ -147,8 +147,10 @@ function applyTheme(themeKey) {
 
 // Update theme display
 function updateThemeDisplay() {
-    document.getElementById('currentThemeName').textContent = 
-        defaultThemes[currentSettings.theme]?.name || 'מותאם אישית';
+    const themeNameElement = document.getElementById('currentThemeName');
+    if (themeNameElement) {
+        themeNameElement.textContent = defaultThemes[currentSettings.theme]?.name || 'מותאם אישית';
+    }
     
     // Update active theme card
     document.querySelectorAll('.theme-card').forEach(card => {
@@ -226,37 +228,70 @@ function populateForm() {
     });
 
     // Typography
-    document.getElementById('fontFamily').value = currentSettings.typography.fontFamily;
-    document.getElementById('baseFontSize').value = currentSettings.typography.baseFontSize;
-    document.getElementById('h1Size').value = currentSettings.typography.h1Size;
-    document.getElementById('h2Size').value = currentSettings.typography.h2Size;
-    document.getElementById('bodySize').value = currentSettings.typography.bodySize;
-    document.getElementById('smallSize').value = currentSettings.typography.smallSize;
-    document.getElementById('lineHeight').value = currentSettings.typography.lineHeight;
-    document.getElementById('fontWeight').value = currentSettings.typography.fontWeight;
+    const fontFamilySelect = document.getElementById('fontFamily');
+    const baseFontSizeInput = document.getElementById('baseFontSize');
+    const h1SizeInput = document.getElementById('h1Size');
+    const h2SizeInput = document.getElementById('h2Size');
+    const bodySizeInput = document.getElementById('bodySize');
+    const smallSizeInput = document.getElementById('smallSize');
+    const lineHeightInput = document.getElementById('lineHeight');
+    const fontWeightSelect = document.getElementById('fontWeight');
+
+    if (fontFamilySelect) fontFamilySelect.value = currentSettings.typography.fontFamily;
+    if (baseFontSizeInput) baseFontSizeInput.value = currentSettings.typography.baseFontSize;
+    if (h1SizeInput) h1SizeInput.value = currentSettings.typography.h1Size;
+    if (h2SizeInput) h2SizeInput.value = currentSettings.typography.h2Size;
+    if (bodySizeInput) bodySizeInput.value = currentSettings.typography.bodySize;
+    if (smallSizeInput) smallSizeInput.value = currentSettings.typography.smallSize;
+    if (lineHeightInput) lineHeightInput.value = currentSettings.typography.lineHeight;
+    if (fontWeightSelect) fontWeightSelect.value = currentSettings.typography.fontWeight;
 
     // Spacing
-    document.getElementById('borderRadius').value = currentSettings.spacing.borderRadius;
-    document.getElementById('cardRadius').value = currentSettings.spacing.cardRadius;
-    document.getElementById('padding').value = currentSettings.spacing.padding;
-    document.getElementById('gap').value = currentSettings.spacing.gap;
-    document.getElementById('cardPadding').value = currentSettings.spacing.cardPadding;
-    document.getElementById('shadowIntensity').value = currentSettings.spacing.shadowIntensity;
+    const borderRadiusInput = document.getElementById('borderRadius');
+    const cardRadiusInput = document.getElementById('cardRadius');
+    const paddingInput = document.getElementById('padding');
+    const gapInput = document.getElementById('gap');
+    const cardPaddingInput = document.getElementById('cardPadding');
+    const shadowIntensityInput = document.getElementById('shadowIntensity');
+
+    if (borderRadiusInput) borderRadiusInput.value = currentSettings.spacing.borderRadius;
+    if (cardRadiusInput) cardRadiusInput.value = currentSettings.spacing.cardRadius;
+    if (paddingInput) paddingInput.value = currentSettings.spacing.padding;
+    if (gapInput) gapInput.value = currentSettings.spacing.gap;
+    if (cardPaddingInput) cardPaddingInput.value = currentSettings.spacing.cardPadding;
+    if (shadowIntensityInput) {
+        shadowIntensityInput.value = currentSettings.spacing.shadowIntensity;
+        shadowIntensityInput.nextElementSibling.textContent = currentSettings.spacing.shadowIntensity;
+    }
 
     // Content
-    document.getElementById('mainTitle').value = currentSettings.content.mainTitle;
-    document.getElementById('mainSubtitle').value = currentSettings.content.mainSubtitle;
-    document.getElementById('addButtonText').value = currentSettings.content.addButtonText;
-    document.getElementById('exportButtonText').value = currentSettings.content.exportButtonText;
-    document.getElementById('importButtonText').value = currentSettings.content.importButtonText;
-    document.getElementById('searchPlaceholder').value = currentSettings.content.searchPlaceholder;
-    document.getElementById('emptyStateTitle').value = currentSettings.content.emptyStateTitle;
-    document.getElementById('emptyStateText').value = currentSettings.content.emptyStateText;
-    document.getElementById('modalAddTitle').value = currentSettings.content.modalAddTitle;
-    document.getElementById('modalEditTitle').value = currentSettings.content.modalEditTitle;
-    document.getElementById('stat1Label').value = currentSettings.content.stat1Label;
-    document.getElementById('stat2Label').value = currentSettings.content.stat2Label;
-    document.getElementById('stat3Label').value = currentSettings.content.stat3Label;
+    const mainTitleInput = document.getElementById('mainTitle');
+    const mainSubtitleInput = document.getElementById('mainSubtitle');
+    const addButtonTextInput = document.getElementById('addButtonText');
+    const exportButtonTextInput = document.getElementById('exportButtonText');
+    const importButtonTextInput = document.getElementById('importButtonText');
+    const searchPlaceholderInput = document.getElementById('searchPlaceholder');
+    const emptyStateTitleInput = document.getElementById('emptyStateTitle');
+    const emptyStateTextInput = document.getElementById('emptyStateText');
+    const modalAddTitleInput = document.getElementById('modalAddTitle');
+    const modalEditTitleInput = document.getElementById('modalEditTitle');
+    const stat1LabelInput = document.getElementById('stat1Label');
+    const stat2LabelInput = document.getElementById('stat2Label');
+    const stat3LabelInput = document.getElementById('stat3Label');
+
+    if (mainTitleInput) mainTitleInput.value = currentSettings.content.mainTitle;
+    if (mainSubtitleInput) mainSubtitleInput.value = currentSettings.content.mainSubtitle;
+    if (addButtonTextInput) addButtonTextInput.value = currentSettings.content.addButtonText;
+    if (exportButtonTextInput) exportButtonTextInput.value = currentSettings.content.exportButtonText;
+    if (importButtonTextInput) importButtonTextInput.value = currentSettings.content.importButtonText;
+    if (searchPlaceholderInput) searchPlaceholderInput.value = currentSettings.content.searchPlaceholder;
+    if (emptyStateTitleInput) emptyStateTitleInput.value = currentSettings.content.emptyStateTitle;
+    if (emptyStateTextInput) emptyStateTextInput.value = currentSettings.content.emptyStateText;
+    if (modalAddTitleInput) modalAddTitleInput.value = currentSettings.content.modalAddTitle;
+    if (modalEditTitleInput) modalEditTitleInput.value = currentSettings.content.modalEditTitle;
+    if (stat1LabelInput) stat1LabelInput.value = currentSettings.content.stat1Label;
+    if (stat2LabelInput) stat2LabelInput.value = currentSettings.content.stat2Label;
+    if (stat3LabelInput) stat3LabelInput.value = currentSettings.content.stat3Label;
 
     updateThemeDisplay();
 }
@@ -280,7 +315,7 @@ function showPreview() {
     previewCard.style.setProperty('--h2-size', currentSettings.typography.h2Size + 'rem');
     previewCard.style.setProperty('--body-size', currentSettings.typography.bodySize + 'rem');
     previewCard.style.setProperty('--line-height', currentSettings.typography.lineHeight);
-    previewCard.style.fontFamily = currentSettings.typography.fontFamily;
+    previewCard.fontFamily = currentSettings.typography.fontFamily;
     
     previewSection.hidden = false;
     previewSection.scrollIntoView({ behavior: 'smooth' });
@@ -334,9 +369,12 @@ function resetToDefaults() {
 // Setup event listeners
 function setupEventListeners() {
     // Back button
-    document.getElementById('backBtn').addEventListener('click', () => {
-        window.location.href = 'index.html';
-    });
+    const backBtn = document.getElementById('backBtn');
+    if (backBtn) {
+        backBtn.addEventListener('click', () => {
+            window.location.href = 'index.html';
+        });
+    }
 
     // Theme selection
     document.querySelectorAll('.theme-card').forEach(card => {
@@ -368,29 +406,41 @@ function setupEventListeners() {
     });
 
     // Range slider display
-    document.getElementById('shadowIntensity').addEventListener('input', (e) => {
-        e.target.nextElementSibling.textContent = e.target.value;
-    });
+    const shadowIntensityInput = document.getElementById('shadowIntensity');
+    if (shadowIntensityInput) {
+        shadowIntensityInput.addEventListener('input', (e) => {
+            e.target.nextElementSibling.textContent = e.target.value;
+        });
+    }
 
     // Action buttons
-    document.getElementById('previewBtn').addEventListener('click', showPreview);
-    document.getElementById('saveBtn').addEventListener('click', () => {
+    const previewBtn = document.getElementById('previewBtn');
+    const saveBtn = document.getElementById('saveBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const exportSettingsBtn = document.getElementById('exportSettingsBtn');
+    const importSettingsBtn = document.getElementById('importSettingsBtn');
+    const importSettingsFile = document.getElementById('importSettingsFile');
+
+    if (previewBtn) previewBtn.addEventListener('click', showPreview);
+    if (saveBtn) saveBtn.addEventListener('click', () => {
         collectSettings();
         saveSettings();
     });
-    document.getElementById('resetBtn').addEventListener('click', resetToDefaults);
-    document.getElementById('exportSettingsBtn').addEventListener('click', exportSettings);
-    document.getElementById('importSettingsBtn').addEventListener('click', () => {
-        document.getElementById('importSettingsFile').click();
+    if (resetBtn) resetBtn.addEventListener('click', resetToDefaults);
+    if (exportSettingsBtn) exportSettingsBtn.addEventListener('click', exportSettings);
+    if (importSettingsBtn) importSettingsBtn.addEventListener('click', () => {
+        if (importSettingsFile) importSettingsFile.click();
     });
-    document.getElementById('importSettingsFile').addEventListener('change', importSettings);
+    if (importSettingsFile) importSettingsFile.addEventListener('change', importSettings);
 }
 
 // Initialize
 function init() {
+    console.log('Initializing settings...');
     loadSettings();
     populateForm();
     setupEventListeners();
+    console.log('Settings initialization completed');
 }
 
 document.addEventListener('DOMContentLoaded', init);
