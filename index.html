@@ -4,12 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>לוח הבקרה של האפליקציות שלי</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="לוח אפליקציות">
+    <meta name="description" content="מקום אחד בו ניתן לראות, לארגן ולהגיע לכל המערכות האישיות שאתה בונה">
+    <meta name="keywords" content="אפליקציות, פרודוקטיביות, ניהול, פרויקטים">
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" href="icons/icon-72x72.png">
+    <link rel="apple-touch-icon" href="icons/icon-152x152.png">
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Fonts & Styles -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
     <style>
 :root {
     color-scheme: light dark;
@@ -220,6 +237,87 @@ body {
 .compact-btn-close:hover {
     background: rgba(148, 163, 184, 0.3);
     transform: scale(1.1);
+}
+
+.install-prompt {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: white;
+    border-radius: 16px;
+    padding: 1rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    z-index: 10000;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.install-prompt-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    justify-content: space-between;
+}
+
+.install-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.install-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.install-text strong {
+    font-weight: 700;
+}
+
+.install-text span {
+    font-size: 0.85rem;
+    opacity: 0.9;
+}
+
+.install-btn-primary {
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+.install-btn-primary:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+}
+
+@media (max-width: 768px) {
+    .install-prompt {
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+    }
+    
+    .install-prompt-content {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+    
+    .install-text {
+        flex-basis: 100%;
+        text-align: center;
+    }
 }
 
 @media (max-width: 767px) {
@@ -938,6 +1036,20 @@ textarea {
 </head>
 <body>
     <div class="page">
+        <!-- Install Prompt -->
+        <aside id="installPrompt" class="install-prompt" hidden>
+            <div class="install-prompt-content">
+                <span class="install-icon">📱</span>
+                <div class="install-text">
+                    <strong>התקן את האפליקציה</strong>
+                    <span>גישה מהירה מהמסך הראשי</span>
+                </div>
+                <button class="compact-btn install-btn-primary" id="installAcceptBtn">התקן</button>
+                <button class="compact-btn-close" id="installDismissBtn">✕</button>
+            </div>
+        </aside>
+        
+        <!-- Backup Reminder -->
         <aside id="backupReminder" class="backup-reminder-compact" hidden>
             <div class="backup-reminder-content-compact">
                 <span class="backup-icon-small">💾</span>
@@ -954,6 +1066,10 @@ textarea {
             </div>
             <div class="header-actions">
                 <span id="syncStatus" class="sync-status">טוען...</span>
+                <!-- Install Button -->
+                <button class="secondary-btn" id="installBtn" type="button" title="התקן אפליקציה" hidden>
+                    <span>📱 התקן</span>
+                </button>
                 <button class="icon-btn-settings" id="settingsBtn" type="button" title="הגדרות">⚙️</button>
                 <button class="secondary-btn" id="exportBtn" type="button" title="ייצוא נתונים">
                     <span id="exportBtnText">📥 ייצוא</span>

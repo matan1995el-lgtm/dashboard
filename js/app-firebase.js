@@ -35,6 +35,10 @@ let app;
 let database;
 let isFirebaseInitialized = false;
 
+// PWA variables
+let deferredPrompt;
+let isAppInstalled = false;
+
 // DOM elements - יאותחלו בהמשך
 let dom = {};
 
@@ -49,7 +53,7 @@ function initializeDOM() {
         importBtn: document.getElementById('importBtn'),
         importFile: document.getElementById('importFile'),
         modal: document.getElementById('appModal'),
-        form: document.getElementById('appForm'), // ✅ תוקן מ-'form' ל-'appForm'
+        form: document.getElementById('appForm'),
         closeModalBtn: document.getElementById('closeModalBtn'),
         cancelModalBtn: document.getElementById('cancelModalBtn'),
         appsGrid: document.getElementById('appsGrid'),
@@ -67,7 +71,11 @@ function initializeDOM() {
         syncStatus: document.getElementById('syncStatus'),
         settingsBtn: document.getElementById('settingsBtn'),
         backupNowBtn: document.getElementById('backupNowBtn'),
-        snoozeBackupBtn: document.getElementById('snoozeBackupBtn')
+        snoozeBackupBtn: document.getElementById('snoozeBackupBtn'),
+        installBtn: document.getElementById('installBtn'),
+        installPrompt: document.getElementById('installPrompt'),
+        installAcceptBtn: document.getElementById('installAcceptBtn'),
+        installDismissBtn: document.getElementById('installDismissBtn')
     };
     console.log('✅ DOM initialization completed');
 }
@@ -127,6 +135,140 @@ function initializeFirebase() {
         isFirebaseInitialized = false;
         updateSyncStatus('שגיאת Firebase', 'error');
         return false;
+    }
+}
+
+// ==================== PWA Functions ====================
+
+function initPWA() {
+    console.log('📱 מאתחל PWA...');
+    
+    // רישום Service Worker
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js')
+            .then(function(registration) {
+                console.log('✅ Service Worker registered with scope:', registration.scope);
+            })
+            .catch(function(error) {
+                console.log('❌ Service Worker registration failed:', error);
+            });
+    }
+    
+    // טיפול בהתקנה
+    window.addEventListener('beforeinstallprompt', (e) => {
+        console.log('📱 Before install prompt fired');
+        e.preventDefault();
+        deferredPrompt = e;
+        
+        // בדיקה אם האפליקציה כבר מותקנת
+        checkIfAppInstalled();
+        
+        // הצג כפתור התקנה
+        if (dom.installBtn) {
+            dom.installBtn.hidden = false;
+        }
+        
+        // הצג prompt אוטומטי אחרי 10 שניות (אופציונלי)
+        setTimeout(() => {
+            if (!isAppInstalled && deferredPrompt) {
+                showInstallPrompt();
+            }
+        }, 10000);
+    });
+    
+    window.addEventListener('appinstalled', (evt) => {
+        console.log('🎉 PWA was installed');
+        isAppInstalled = true;
+        deferredPrompt = null;
+        
+        // הסתר כפתורים
+        if (dom.installBtn) dom.installBtn.hidden = true;
+        if (dom.installPrompt) dom.installPrompt.hidden = true;
+        
+        // הצג הודעת הצלחה
+        showInstallSuccess();
+    });
+    
+    // בדיקת מצב התקנה בעת טעינה
+    checkIfAppInstalled();
+}
+
+function checkIfAppInstalled() {
+    // בדיקה אם האפליקציה מותקנת כבר
+    if (window.matchMedia('(display-mode: standalone)').matches || 
+        window.navigator.standalone === true) {
+        isAppInstalled = true;
+        if (dom.installBtn) dom.installBtn.hidden = true;
+        if (dom.installPrompt) dom.installPrompt.hidden = true;
+        console.log('✅ App is already installed');
+    }
+}
+
+function showInstallPrompt() {
+    if (dom.installPrompt && !isAppInstalled) {
+        dom.installPrompt.hidden = false;
+    }
+}
+
+function dismissInstallPrompt() {
+    if (dom.installPrompt) {
+        dom.installPrompt.hidden = true;
+    }
+}
+
+function installPWA() {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        
+        deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+                console.log('✅ User accepted the install prompt');
+                if (dom.installPrompt) dom.installPrompt.hidden = true;
+                if (dom.installBtn) dom.installBtn.hidden = true;
+            } else {
+                console.log('❌ User dismissed the install prompt');
+            }
+            deferredPrompt = null;
+        });
+    }
+}
+
+function showInstallSuccess() {
+    const notification = document.createElement('div');
+    notification.className = 'update-notification';
+    notification.innerHTML = `
+        <div class="notification-content">
+            <span>🎉</span>
+            <span>האפליקציה הותקנה בהצלחה!</span>
+            <button class="notification-close">✕</button>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 100);
+    
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 3000);
+    
+    const closeBtn = notification.querySelector('.notification-close');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        });
     }
 }
 
@@ -901,7 +1043,7 @@ function showUpdateNotification(count) {
     if (Notification.permission === 'granted') {
         new Notification('עדכונים חדשים!', {
             body: `יש ${count} אפליקציות שעודכנו`,
-            icon: '/icon.png'
+            icon: '/icons/icon-192x192.png'
         });
     } else {
         const notification = document.createElement('div');
@@ -1062,8 +1204,9 @@ function setupEventListeners() {
     const requiredElements = [
         'openModalBtn', 'emptyStateBtn', 'exportBtn', 'importBtn', 
         'settingsBtn', 'backupNowBtn', 'snoozeBackupBtn', 'importFile',
-        'closeModalBtn', 'cancelModalBtn', 'appForm', 'searchInput', // ✅ תוקן מ-'form' ל-'appForm'
-        'favoriteFilter', 'languageFilter', 'categoryFilter', 'sortSelect'
+        'closeModalBtn', 'cancelModalBtn', 'appForm', 'searchInput',
+        'favoriteFilter', 'languageFilter', 'categoryFilter', 'sortSelect',
+        'installBtn', 'installAcceptBtn', 'installDismissBtn'
     ];
     
     requiredElements.forEach(id => {
@@ -1162,6 +1305,19 @@ function setupEventListeners() {
         dom.snoozeBackupBtn.addEventListener('click', snoozeBackupReminder);
     }
 
+    // PWA event listeners
+    if (dom.installBtn) {
+        dom.installBtn.addEventListener('click', installPWA);
+    }
+    
+    if (dom.installAcceptBtn) {
+        dom.installAcceptBtn.addEventListener('click', installPWA);
+    }
+    
+    if (dom.installDismissBtn) {
+        dom.installDismissBtn.addEventListener('click', dismissInstallPrompt);
+    }
+
     console.log('✅ Event listeners setup completed');
 }
 
@@ -1171,13 +1327,16 @@ async function init() {
     // שלב 1: אתחול DOM
     initializeDOM();
     
-    // שלב 2: אתחול Firebase
+    // שלב 2: אתחול PWA
+    initPWA();
+    
+    // שלב 3: אתחול Firebase
     initializeFirebase();
     
-    // שלב 3: טעינת הגדרות
+    // שלב 4: טעינת הגדרות
     loadAndApplySettings();
     
-    // שלב 4: טעינת נתונים
+    // שלב 5: טעינת נתונים
     if (USE_FIREBASE && isFirebaseInitialized) {
         try {
             console.log('📡 Attempting to load from Firebase...');
@@ -1191,13 +1350,13 @@ async function init() {
         loadFromStorage();
     }
     
-    // שלב 5: אתחול event listeners
+    // שלב 6: אתחול event listeners
     setupEventListeners();
     
-    // שלב 6: רינדור ראשוני
+    // שלב 7: רינדור ראשוני
     render();
     
-    // שלב 7: פיצ'רים נוספים
+    // שלב 8: פיצ'רים נוספים
     checkBackupReminder();
     requestNotificationPermission();
     
