@@ -1,16 +1,16 @@
 // Service Worker for Apps Dashboard PWA
 const CACHE_NAME = 'apps-dashboard-v2.0.0';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/settings.html',
-  '/js/app-firebase.js',
-  '/js/settings.js',
-  '/manifest.json',
-  '/icons/icon-72x72.png',
-  '/icons/icon-152x152.png',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png'
+  './',
+  './index.html',
+  './settings.html',
+  './js/app-firebase.js',
+  './js/settings.js',
+  './manifest.json',
+  './icons/icon-72x72.png',
+  './icons/icon-152x152.png',
+  './icons/icon-192x192.png',
+  './icons/icon-512x512.png'
 ];
 
 // התקנת Service Worker
@@ -84,7 +84,7 @@ self.addEventListener('fetch', function(event) {
       .catch(function() {
         // במקרה של חוסר חיבור, מחזירים דף אופף
         if (event.request.destination === 'document') {
-          return caches.match('/index.html');
+          return caches.match('./index.html');
         }
       })
   );
@@ -96,8 +96,8 @@ self.addEventListener('push', function(event) {
   
   const options = {
     body: event.data ? event.data.text() : 'עדכון חדש בלוח האפליקציות!',
-    icon: '/icons/icon-192x192.png',
-    badge: '/icons/icon-72x72.png',
+    icon: './icons/icon-192x192.png',
+    badge: './icons/icon-72x72.png',
     vibrate: [200, 100, 200],
     tag: 'apps-dashboard-update',
     renotify: true,
@@ -125,7 +125,7 @@ self.addEventListener('notificationclick', function(event) {
 
   if (event.action === 'open') {
     event.waitUntil(
-      clients.openWindow('/')
+      clients.openWindow('./')
     );
   }
 });
